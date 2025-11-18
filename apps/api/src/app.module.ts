@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -11,6 +12,11 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { UsersModule } from './modules/users/users.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { SkillsModule } from './modules/skills/skills.module';
+import { HealthModule } from './modules/health/health.module';
+import { LoggerService } from './common/services/logger.service';
+import { CacheService } from './common/services/cache.service';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 @Module({
   imports: [
@@ -46,6 +52,9 @@ import { SkillsModule } from './modules/skills/skills.module';
     CoursesModule,
     SkillsModule,
 
+    // Infrastructure modules
+    HealthModule,
+
     // Additional modules (to be implemented)
     // LessonsModule,
     // TeamsModule,
@@ -54,6 +63,18 @@ import { SkillsModule } from './modules/skills/skills.module';
     // VideoModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    LoggerService,
+    CacheService,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+  ],
 })
 export class AppModule {}
