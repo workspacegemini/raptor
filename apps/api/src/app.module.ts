@@ -12,6 +12,10 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { UsersModule } from './modules/users/users.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { SkillsModule } from './modules/skills/skills.module';
+import { LessonsModule } from './modules/lessons/lessons.module';
+import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
+import { TeamsModule } from './modules/teams/teams.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { HealthModule } from './modules/health/health.module';
 import { LoggerService } from './common/services/logger.service';
 import { CacheService } from './common/services/cache.service';
@@ -51,16 +55,13 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     UsersModule,
     CoursesModule,
     SkillsModule,
+    LessonsModule,
+    EnrollmentsModule,
+    TeamsModule,
+    AnalyticsModule,
 
     // Infrastructure modules
     HealthModule,
-
-    // Additional modules (to be implemented)
-    // LessonsModule,
-    // TeamsModule,
-    // EnrollmentsModule,
-    // AnalyticsModule,
-    // VideoModule,
   ],
   controllers: [AppController],
   providers: [
