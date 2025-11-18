@@ -1,0 +1,630 @@
+// Prisma Schema for Enterprise Performance Engine
+// AI-native corporate learning platform
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MULTI-TENANT & USER MANAGEMENT
+// ============================================
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  domain    String?
+  logoUrl   String?
+  settings  Json?    @default("{}")
+
+  status    OrganizationStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  users             User[]
+  teams             Team[]
+  courses           Course[]
+  skills            Skill[]
+  aiGenerationJobs  AiGenerationJob[]
+  analyticsEvents   AnalyticsEvent[]
+
+  @@index([slug])
+  @@index([status])
+  @@map("organizations")
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+model User {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  passwordHash   String
+  firstName      String
+  lastName       String
+  avatarUrl      String?
+  phoneNumber    String?
+
+  role           UserRole @default(LEARNER)
+  status         UserStatus @default(ACTIVE)
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Preferences and metadata
+  preferences    Json?    @default("{}")
+  metadata       Json?    @default("{}")
+
+  // Tracking
+  lastLoginAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  // Relations
+  refreshTokens     RefreshToken[]
+  teamMemberships   TeamMember[]
+  enrollments       Enrollment[]
+  lessonProgress    LessonProgress[]
+  competencies      UserCompetency[]
+  analyticsEvents   AnalyticsEvent[]
+  aiGenerationJobs  AiGenerationJob[]
+  createdCourses    Course[] @relation("CourseCreator")
+  updatedCourses    Course[] @relation("CourseUpdater")
+
+  @@index([email])
+  @@index([organizationId])
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ORG_ADMIN
+  MANAGER
+  INSTRUCTOR
+  LEARNER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// ============================================
+// TEAM STRUCTURE
+// ============================================
+
+model Team {
+  id             String   @id @default(uuid())
+  name           String
+  description    String?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  parentTeamId   String?
+  parentTeam     Team?    @relation("TeamHierarchy", fields: [parentTeamId], references: [id])
+  childTeams     Team[]   @relation("TeamHierarchy")
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  // Relations
+  members        TeamMember[]
+  enrollments    Enrollment[]
+
+  @@index([organizationId])
+  @@index([parentTeamId])
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role      TeamMemberRole @default(MEMBER)
+  joinedAt  DateTime @default(now())
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+  @@map("team_members")
+}
+
+enum TeamMemberRole {
+  LEAD
+  MEMBER
+}
+
+// ============================================
+// SKILLS & COMPETENCIES
+// ============================================
+
+model Skill {
+  id             String   @id @default(uuid())
+  name           String
+  description    String?
+  category       String?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  parentSkillId  String?
+  parentSkill    Skill?   @relation("SkillHierarchy", fields: [parentSkillId], references: [id])
+  childSkills    Skill[]  @relation("SkillHierarchy")
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  courseSkills      CourseSkill[]
+  lessonSkills      LessonSkill[]
+  userCompetencies  UserCompetency[]
+
+  @@index([organizationId])
+  @@index([parentSkillId])
+  @@index([category])
+  @@map("skills")
+}
+
+model UserCompetency {
+  id        String   @id @default(uuid())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  skillId   String
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  level     CompetencyLevel @default(AWARE)
+
+  achievedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+  @@index([level])
+  @@map("user_competencies")
+}
+
+enum CompetencyLevel {
+  AWARE       // Just introduced to the concept
+  NOVICE      // Basic understanding
+  COMPETENT   // Can perform with supervision
+  PROFICIENT  // Can perform independently
+  EXPERT      // Can teach others and innovate
+}
+
+// ============================================
+// COURSES & LESSONS
+// ============================================
+
+model Course {
+  id             String   @id @default(uuid())
+  title          String
+  description    String
+  thumbnailUrl   String?
+
+  type           CourseType @default(STANDARD)
+  status         CourseStatus @default(DRAFT)
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Metadata
+  estimatedDuration Int?    // in seconds
+  difficulty     CourseDifficulty?
+  tags           String[]
+
+  // Tracking
+  createdById    String
+  createdBy      User     @relation("CourseCreator", fields: [createdById], references: [id])
+
+  updatedById    String?
+  updatedBy      User?    @relation("CourseUpdater", fields: [updatedById], references: [id])
+
+  publishedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  // Relations
+  lessons        Lesson[]
+  skills         CourseSkill[]
+  enrollments    Enrollment[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([type])
+  @@index([createdById])
+  @@map("courses")
+}
+
+enum CourseType {
+  MICROLEARNING   // 3-5 minute lessons
+  STANDARD        // Regular course
+  CERTIFICATION   // Certification program
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CourseDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+model CourseSkill {
+  id        String @id @default(uuid())
+
+  courseId  String
+  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  skillId   String
+  skill     Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, skillId])
+  @@index([courseId])
+  @@index([skillId])
+  @@map("course_skills")
+}
+
+model Lesson {
+  id             String   @id @default(uuid())
+  title          String
+  description    String
+  content        String   @db.Text // Markdown content
+
+  type           LessonType @default(TEXT)
+  order          Int      @default(0)
+
+  courseId       String
+  course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // Duration in seconds
+  duration       Int?     @default(0)
+
+  // Video integration (Mux)
+  videoId        String?
+  video          Video?   @relation(fields: [videoId], references: [id])
+
+  // Vector embeddings for semantic search
+  embedding      Float[]  // Vector embedding from OpenAI
+  embeddingModel String?  @default("text-embedding-ada-002")
+
+  // Metadata
+  thumbnailUrl   String?
+  resources      Json?    @default("[]") // Additional resources/links
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  // Relations
+  skills         LessonSkill[]
+  quizzes        Quiz[]
+  progress       LessonProgress[]
+
+  @@index([courseId])
+  @@index([type])
+  @@index([videoId])
+  @@map("lessons")
+}
+
+enum LessonType {
+  VIDEO
+  TEXT
+  INTERACTIVE
+  QUIZ
+}
+
+model LessonSkill {
+  id        String @id @default(uuid())
+
+  lessonId  String
+  lesson    Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  skillId   String
+  skill     Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, skillId])
+  @@index([lessonId])
+  @@index([skillId])
+  @@map("lesson_skills")
+}
+
+// ============================================
+// VIDEO MANAGEMENT (MUX)
+// ============================================
+
+model Video {
+  id           String   @id @default(uuid())
+
+  // Mux specific fields
+  muxAssetId   String   @unique
+  muxPlaybackId String?
+  uploadId     String?
+
+  status       VideoStatus @default(PREPARING)
+
+  // Video metadata
+  title        String?
+  description  String?
+  duration     Float?   // in seconds
+  aspectRatio  String?
+
+  // URLs
+  streamUrl    String?
+  thumbnailUrl String?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  lessons      Lesson[]
+
+  @@index([muxAssetId])
+  @@index([status])
+  @@map("videos")
+}
+
+enum VideoStatus {
+  PREPARING
+  READY
+  ERROR
+}
+
+// ============================================
+// QUIZZES & ASSESSMENTS
+// ============================================
+
+model Quiz {
+  id           String   @id @default(uuid())
+  title        String
+  description  String?
+
+  lessonId     String
+  lesson       Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  passingScore Int      @default(70) // Percentage
+  randomize    Boolean  @default(false)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  questions    QuizQuestion[]
+
+  @@index([lessonId])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id           String   @id @default(uuid())
+
+  quizId       String
+  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  question     String   @db.Text
+  explanation  String?  @db.Text
+  type         QuestionType @default(MULTIPLE_CHOICE)
+  order        Int      @default(0)
+
+  // Options and correct answers stored as JSON
+  options      Json     // Array of options
+  correctAnswers Json   // Array of correct answer indices
+
+  points       Int      @default(1)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([quizId])
+  @@map("quiz_questions")
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  MULTIPLE_SELECT
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+// ============================================
+// ENROLLMENT & PROGRESS TRACKING
+// ============================================
+
+model Enrollment {
+  id           String   @id @default(uuid())
+
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  courseId     String
+  course       Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  teamId       String?
+  team         Team?    @relation(fields: [teamId], references: [id])
+
+  status       EnrollmentStatus @default(ACTIVE)
+
+  // Progress
+  progress     Float    @default(0) // Percentage 0-100
+  completedAt  DateTime?
+
+  enrolledAt   DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([teamId])
+  @@index([status])
+  @@map("enrollments")
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+}
+
+model LessonProgress {
+  id           String   @id @default(uuid())
+
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  lessonId     String
+  lesson       Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  // Progress tracking
+  status       ProgressStatus @default(NOT_STARTED)
+  progress     Float    @default(0) // Percentage 0-100
+
+  // Video specific
+  lastPosition Int?     @default(0) // Last video position in seconds
+
+  // Quiz results
+  quizScore    Float?
+  quizAttempts Int      @default(0)
+
+  completedAt  DateTime?
+  startedAt    DateTime?
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+  @@index([status])
+  @@map("lesson_progress")
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+// ============================================
+// AI CONTENT GENERATION
+// ============================================
+
+model AiGenerationJob {
+  id             String   @id @default(uuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Job configuration
+  courseId       String?
+  documentName   String
+  documentUrl    String?
+  targetLessonCount Int   @default(10)
+
+  // Job status
+  status         JobStatus @default(PENDING)
+  progress       Float    @default(0) // Percentage 0-100
+
+  // Results
+  generatedLessons Json?  // Array of generated lesson data
+  error          String?  @db.Text
+
+  // Metadata
+  metadata       Json?    @default("{}")
+
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("ai_generation_jobs")
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ============================================
+// ANALYTICS & TRACKING
+// ============================================
+
+model AnalyticsEvent {
+  id             String   @id @default(uuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Event details
+  eventType      String
+  eventName      String
+
+  // Event data
+  properties     Json?    @default("{}")
+
+  // Context
+  userAgent      String?
+  ipAddress      String?
+  deviceType     String?
+
+  timestamp      DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([eventType])
+  @@index([eventName])
+  @@index([timestamp])
+  @@map("analytics_events")
+}

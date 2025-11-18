@@ -1,0 +1,29 @@
+{
+  "name": "enterprise-performance-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-native corporate learning platform with competency-based credentials",
+  "scripts": {
+    "dev:api": "npm run dev --workspace=@epe/api",
+    "dev:admin": "npm run dev --workspace=@epe/admin-web",
+    "dev:mobile": "npm run start --workspace=@epe/mobile",
+    "build:api": "npm run build --workspace=@epe/api",
+    "build:admin": "npm run build --workspace=@epe/admin-web",
+    "prisma:migrate": "npm run prisma:migrate --workspace=@epe/api",
+    "prisma:studio": "npm run prisma:studio --workspace=@epe/api"
+  },
+  "workspaces": [
+    "apps/api",
+    "apps/admin-web",
+    "apps/mobile",
+    "libs/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
