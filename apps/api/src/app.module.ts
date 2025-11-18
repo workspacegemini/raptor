@@ -7,6 +7,10 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AiGenerationModule } from './modules/ai-generation/ai-generation.module';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { UsersModule } from './modules/users/users.module';
+import { CoursesModule } from './modules/courses/courses.module';
+import { SkillsModule } from './modules/skills/skills.module';
 
 @Module({
   imports: [
@@ -37,13 +41,15 @@ import { AiGenerationModule } from './modules/ai-generation/ai-generation.module
     // Feature modules
     AuthModule,
     AiGenerationModule,
+    OrganizationsModule,
+    UsersModule,
+    CoursesModule,
+    SkillsModule,
 
     // Additional modules (to be implemented)
-    // UsersModule,
-    // OrganizationsModule,
-    // CoursesModule,
     // LessonsModule,
-    // SkillsModule,
+    // TeamsModule,
+    // EnrollmentsModule,
     // AnalyticsModule,
     // VideoModule,
   ],
