@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: epe-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-epe}
+      POSTGRES_USER: ${DATABASE_USER:-epe_user}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-epe_password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - '${DATABASE_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DATABASE_USER:-epe_user}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - epe-network
+
+  # Redis Cache & Queue
+  redis:
+    image: redis:7-alpine
+    container_name: epe-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-epe_redis_password}
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - epe-network
+
+  # NestJS API
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: epe-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${DATABASE_USER:-epe_user}:${DATABASE_PASSWORD:-epe_password}@postgres:5432/${DATABASE_NAME:-epe}?schema=public
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-epe_redis_password}
+
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+
+      # AI Services
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+      # Pinecone
+      PINECONE_API_KEY: ${PINECONE_API_KEY}
+      PINECONE_ENVIRONMENT: ${PINECONE_ENVIRONMENT}
+      PINECONE_INDEX: ${PINECONE_INDEX:-epe-lessons}
+
+      # App Config
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3001
+
+      # CORS
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+
+      # Rate Limiting
+      RATE_LIMIT_TTL: ${RATE_LIMIT_TTL:-60}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
+    ports:
+      - '${API_PORT:-3001}:3001'
+    volumes:
+      - ./apps/api/logs:/app/logs
+      - ./apps/api/uploads:/app/uploads
+    networks:
+      - epe-network
+    command: sh -c "npx prisma migrate deploy && node dist/main.js"
+
+  # Next.js Admin Dashboard
+  admin:
+    build:
+      context: ./apps/admin-web
+      dockerfile: Dockerfile
+    container_name: epe-admin
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api/v1}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Enterprise Performance Engine}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      NEXT_PUBLIC_ENABLE_AI_GENERATION: ${NEXT_PUBLIC_ENABLE_AI_GENERATION:-true}
+      NEXT_PUBLIC_ENABLE_ANALYTICS: ${NEXT_PUBLIC_ENABLE_ANALYTICS:-true}
+      NODE_ENV: ${NODE_ENV:-production}
+    ports:
+      - '${ADMIN_PORT:-3000}:3000'
+    networks:
+      - epe-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  epe-network:
+    driver: bridge
