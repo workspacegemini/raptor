@@ -1,0 +1,42 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # EPE API Logs
+  - job_name: epe-api
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: epe-api
+          __path__: /var/log/epe/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            context: context
+            trace: trace
+      - labels:
+          level:
+          context:
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+
+  # System Logs (optional)
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlogs
+          __path__: /var/log/*log

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Course Completed!</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #ffffff; padding: 30px; border: 1px solid #e0e0e0; }
+        .badge { text-align: center; font-size: 48px; margin: 20px 0; }
+        .button { display: inline-block; padding: 12px 30px; background: #FFD700; color: #333; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Congratulations!</h1>
+        </div>
+        <div class="content">
+            <h2>Amazing work, {{userName}}!</h2>
+            <div class="badge">🏆</div>
+            <p>You've successfully completed <strong>{{courseName}}</strong>!</p>
+
+            <p>This is a significant achievement that demonstrates your commitment to continuous learning and professional development.</p>
+
+            {{#if certificateUrl}}
+            <p>Your certificate of completion is ready:</p>
+            <a href="{{certificateUrl}}" class="button">Download Certificate</a>
+            {{/if}}
+
+            <p>Keep up the great work and continue your learning journey!</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -17,6 +17,9 @@ import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
 import { TeamsModule } from './modules/teams/teams.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { HealthModule } from './modules/health/health.module';
+import { WebSocketModule } from './websocket/websocket.module';
+import { MonitoringModule } from './monitoring/monitoring.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { LoggerService } from './common/services/logger.service';
 import { CacheService } from './common/services/cache.service';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
@@ -62,6 +65,9 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
     // Infrastructure modules
     HealthModule,
+    WebSocketModule,
+    MonitoringModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [
