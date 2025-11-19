@@ -20,6 +20,7 @@ import { HealthModule } from './modules/health/health.module';
 import { WebSocketModule } from './websocket/websocket.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { StorageModule } from './storage/storage.module';
 import { LoggerService } from './common/services/logger.service';
 import { CacheService } from './common/services/cache.service';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
@@ -68,6 +69,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     WebSocketModule,
     MonitoringModule,
     NotificationsModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [
