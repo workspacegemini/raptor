@@ -57,7 +57,7 @@ export class EnrollmentsController {
   @Get()
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORG_ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'List all enrollments (Admin/Manager only)' })
-  @ApiResponse({ status: 200, description: 'List of enrollments' }}
+  @ApiResponse({ status: 200, description: 'List of enrollments' })
   findAll(
     @CurrentUser() user: any,
     @Query('courseId') courseId?: string,
@@ -129,7 +129,7 @@ export class EnrollmentsController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Unenroll from course' })
-  @ApiResponse({ status: 200, description: 'Successfully unenrolled' }}
+  @ApiResponse({ status: 200, description: 'Successfully unenrolled' })
   unenroll(@Param('id') id: string, @CurrentUser() user: any) {
     return this.enrollmentsService.unenroll(id, user.organizationId);
   }

@@ -63,7 +63,7 @@ export class CoursesController {
   @Post(':id/archive')
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORG_ADMIN)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Archive course' }}
+  @ApiOperation({ summary: 'Archive course' })
   archive(@Param('id') id: string, @CurrentUser() user: any) {
     return this.coursesService.archive(id, user.organizationId);
   }
