@@ -65,7 +65,7 @@ jobs:
       - name: Type check
         run: |
           cd apps/api
-          npm run type-check || echo "Type check not configured"
+          npm run type-check
 
       - name: Generate Prisma Client
         run: |
@@ -88,7 +88,7 @@ jobs:
           JWT_REFRESH_SECRET: test_jwt_refresh_secret_key_for_ci
         run: |
           cd apps/api
-          npm test || echo "Tests not yet configured"
+          npm test
 
   # ============================================================================
   # API Build
@@ -165,7 +165,7 @@ jobs:
       - name: Run tests
         run: |
           cd apps/admin-web
-          npm test || echo "Tests not yet configured"
+          npm test
 
   # ============================================================================
   # Admin Build
