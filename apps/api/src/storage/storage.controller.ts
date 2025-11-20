@@ -26,6 +26,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
 import { StorageService } from './storage.service';
+import { validateFileKey } from '../common/validators/file-key.validator';
 
 @ApiTags('Storage')
 @Controller('storage')
@@ -230,6 +231,7 @@ export class StorageController {
   @ApiOperation({ summary: 'Get signed download URL' })
   @ApiResponse({ status: 200, description: 'Signed URL generated successfully' })
   async getSignedDownloadUrl(@Param('key') key: string) {
+    validateFileKey(key);
     const url = await this.storageService.getSignedDownloadUrl(key);
     return { url };
   }
@@ -245,6 +247,7 @@ export class StorageController {
       throw new BadRequestException('Key and contentType are required');
     }
 
+    validateFileKey(key);
     const url = await this.storageService.getSignedUploadUrl(key, contentType);
     return { url };
   }
@@ -254,6 +257,7 @@ export class StorageController {
   @ApiOperation({ summary: 'Delete file' })
   @ApiResponse({ status: 200, description: 'File deleted successfully' })
   async deleteFile(@Param('key') key: string) {
+    validateFileKey(key);
     await this.storageService.deleteFile(key);
     return { message: 'File deleted successfully' };
   }
@@ -262,6 +266,7 @@ export class StorageController {
   @ApiOperation({ summary: 'Check if file exists' })
   @ApiResponse({ status: 200, description: 'File existence checked' })
   async fileExists(@Param('key') key: string) {
+    validateFileKey(key);
     const exists = await this.storageService.fileExists(key);
     return { exists };
   }
@@ -270,6 +275,7 @@ export class StorageController {
   @ApiOperation({ summary: 'Get file metadata' })
   @ApiResponse({ status: 200, description: 'File metadata retrieved' })
   async getFileMetadata(@Param('key') key: string) {
+    validateFileKey(key);
     const metadata = await this.storageService.getFileMetadata(key);
     return metadata;
   }
