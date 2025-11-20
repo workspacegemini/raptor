@@ -16,6 +16,8 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
+import { CreateSkillDto, UpdateSkillDto, QuerySkillsDto } from './dto';
+import { ICurrentUser } from '../../common/interfaces';
 
 @ApiTags('skills')
 @Controller('skills')
@@ -27,39 +29,39 @@ export class SkillsController {
   @Post()
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORG_ADMIN)
   @ApiOperation({ summary: 'Create new skill' })
-  create(@Body() createDto: any, @CurrentUser() user: any) {
+  create(@Body() createDto: CreateSkillDto, @CurrentUser() user: ICurrentUser) {
     return this.skillsService.create(createDto, user.organizationId);
   }
 
   @Get()
   @ApiOperation({ summary: 'List all skills' })
-  findAll(@CurrentUser() user: any, @Query() query: any) {
+  findAll(@CurrentUser() user: ICurrentUser, @Query() query: QuerySkillsDto) {
     return this.skillsService.findAll(user.organizationId, query);
   }
 
   @Get('hierarchy')
   @ApiOperation({ summary: 'Get skills hierarchy tree' })
-  getHierarchy(@CurrentUser() user: any) {
+  getHierarchy(@CurrentUser() user: ICurrentUser) {
     return this.skillsService.getHierarchy(user.organizationId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get skill by ID' })
-  findOne(@Param('id') id: string, @CurrentUser() user: any) {
+  findOne(@Param('id') id: string, @CurrentUser() user: ICurrentUser) {
     return this.skillsService.findOne(id, user.organizationId);
   }
 
   @Put(':id')
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORG_ADMIN)
   @ApiOperation({ summary: 'Update skill' })
-  update(@Param('id') id: string, @Body() updateDto: any, @CurrentUser() user: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateSkillDto, @CurrentUser() user: ICurrentUser) {
     return this.skillsService.update(id, user.organizationId, updateDto);
   }
 
   @Delete(':id')
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORG_ADMIN)
   @ApiOperation({ summary: 'Delete skill' })
-  remove(@Param('id') id: string, @CurrentUser() user: any) {
+  remove(@Param('id') id: string, @CurrentUser() user: ICurrentUser) {
     return this.skillsService.remove(id, user.organizationId);
   }
 }

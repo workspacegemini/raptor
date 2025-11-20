@@ -15,7 +15,9 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { UserRole, TeamMemberRole } from '@prisma/client';
+import { UserRole } from '@prisma/client';
+import { CreateTeamDto, UpdateTeamDto, AddMemberDto, UpdateMemberRoleDto } from './dto';
+import { ICurrentUser } from '../../common/interfaces';
 
 @ApiTags('teams')
 @Controller('teams')
@@ -28,21 +30,21 @@ export class TeamsController {
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORG_ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Create new team' })
   @ApiResponse({ status: 201, description: 'Team created successfully' })
-  create(@Body() createDto: any, @CurrentUser() user: any) {
+  create(@Body() createDto: CreateTeamDto, @CurrentUser() user: ICurrentUser) {
     return this.teamsService.create(createDto, user.organizationId);
   }
 
   @Get()
   @ApiOperation({ summary: 'List all teams' })
   @ApiResponse({ status: 200, description: 'List of teams' })
-  findAll(@CurrentUser() user: any, @Query() query: any) {
+  findAll(@CurrentUser() user: ICurrentUser, @Query() query: any) {
     return this.teamsService.findAll(user.organizationId, query);
   }
 
   @Get('hierarchy')
   @ApiOperation({ summary: 'Get team hierarchy tree' })
   @ApiResponse({ status: 200, description: 'Team hierarchy retrieved successfully' })
-  getHierarchy(@CurrentUser() user: any) {
+  getHierarchy(@CurrentUser() user: ICurrentUser) {
     return this.teamsService.getHierarchy(user.organizationId);
   }
 
@@ -50,7 +52,7 @@ export class TeamsController {
   @ApiOperation({ summary: 'Get team by ID' })
   @ApiResponse({ status: 200, description: 'Team found' })
   @ApiResponse({ status: 404, description: 'Team not found' })
-  findOne(@Param('id') id: string, @CurrentUser() user: any) {
+  findOne(@Param('id') id: string, @CurrentUser() user: ICurrentUser) {
     return this.teamsService.findOne(id, user.organizationId);
   }
 
@@ -58,7 +60,7 @@ export class TeamsController {
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORG_ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Update team' })
   @ApiResponse({ status: 200, description: 'Team updated successfully' })
-  update(@Param('id') id: string, @Body() updateDto: any, @CurrentUser() user: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateTeamDto, @CurrentUser() user: ICurrentUser) {
     return this.teamsService.update(id, user.organizationId, updateDto);
   }
 
@@ -66,7 +68,7 @@ export class TeamsController {
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORG_ADMIN)
   @ApiOperation({ summary: 'Delete team' })
   @ApiResponse({ status: 200, description: 'Team deleted successfully' })
-  remove(@Param('id') id: string, @CurrentUser() user: any) {
+  remove(@Param('id') id: string, @CurrentUser() user: ICurrentUser) {
     return this.teamsService.remove(id, user.organizationId);
   }
 
@@ -76,8 +78,8 @@ export class TeamsController {
   @ApiResponse({ status: 201, description: 'Member added successfully' })
   addMember(
     @Param('id') id: string,
-    @Body() memberDto: { userId: string; role?: TeamMemberRole },
-    @CurrentUser() user: any,
+    @Body() memberDto: AddMemberDto,
+    @CurrentUser() user: ICurrentUser,
   ) {
     return this.teamsService.addMember(
       id,
@@ -94,7 +96,7 @@ export class TeamsController {
   removeMember(
     @Param('teamId') teamId: string,
     @Param('userId') userId: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: ICurrentUser,
   ) {
     return this.teamsService.removeMember(teamId, userId, user.organizationId);
   }
@@ -106,8 +108,8 @@ export class TeamsController {
   updateMemberRole(
     @Param('teamId') teamId: string,
     @Param('userId') userId: string,
-    @Body() roleDto: { role: TeamMemberRole },
-    @CurrentUser() user: any,
+    @Body() roleDto: UpdateMemberRoleDto,
+    @CurrentUser() user: ICurrentUser,
   ) {
     return this.teamsService.updateMemberRole(teamId, userId, user.organizationId, roleDto.role);
   }
@@ -116,7 +118,7 @@ export class TeamsController {
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORG_ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Get team statistics' })
   @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  getStatistics(@Param('id') id: string, @CurrentUser() user: any) {
+  getStatistics(@Param('id') id: string, @CurrentUser() user: ICurrentUser) {
     return this.teamsService.getStatistics(id, user.organizationId);
   }
 }
