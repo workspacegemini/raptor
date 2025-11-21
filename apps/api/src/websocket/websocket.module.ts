@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { WebSocketGateway } from './websocket.gateway';
+import { AppWebSocketGateway } from './websocket.gateway';
 import { WebSocketService } from './websocket.service';
 import { EventsController } from './events.controller';
 
@@ -19,7 +19,7 @@ import { EventsController } from './events.controller';
     }),
   ],
   controllers: [EventsController],
-  providers: [WebSocketGateway, WebSocketService],
+  providers: [AppWebSocketGateway, WebSocketService],
   exports: [WebSocketService],
 })
 export class WebSocketModule {}

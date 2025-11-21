@@ -4,7 +4,7 @@ import { Queue } from 'bull';
 import { PrismaService } from '../../prisma/prisma.service';
 import { DocumentProcessorService } from './services/document-processor.service';
 import { ClaudeService } from './services/claude.service';
-import { JobStatus } from '@prisma/client';
+import { JobStatus } from '../../common/types/prisma-types';
 
 @Injectable()
 export class AiGenerationService {

@@ -5,6 +5,9 @@ import { PrismaClient } from '@prisma/client';
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
 
+  // Explicitly expose $queryRawUnsafe for compatibility with health checks
+  declare $queryRawUnsafe: PrismaClient['$queryRawUnsafe'];
+
   constructor() {
     super({
       log: [

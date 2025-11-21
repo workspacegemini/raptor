@@ -4,7 +4,7 @@ import { Job } from 'bull';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { ClaudeService } from '../services/claude.service';
 import { EmbeddingsService } from '../services/embeddings.service';
-import { JobStatus } from '@prisma/client';
+import { JobStatus } from '../../../common/types/prisma-types';
 
 interface LessonGenerationJobData {
   jobId: string;

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CacheService } from '../../common/services/cache.service';
-import { EnrollmentStatus, ProgressStatus } from '@prisma/client';
+import { EnrollmentStatus, ProgressStatus } from '../../common/types/prisma-types';
 
 @Injectable()
 export class EnrollmentsService {
@@ -110,7 +110,7 @@ export class EnrollmentsService {
       select: { userId: true },
     });
 
-    const existingUserIds = new Set(existingEnrollments.map((e) => e.userId));
+    const existingUserIds = new Set(existingEnrollments.map((e: { userId: string }) => e.userId));
     const newUserIds = userIds.filter((id) => !existingUserIds.has(id));
 
     if (newUserIds.length === 0) {
@@ -248,7 +248,7 @@ export class EnrollmentsService {
     const lessonProgress = await this.prisma.lessonProgress.findMany({
       where: {
         userId: enrollment.userId,
-        lessonId: { in: enrollment.course.lessons.map((l) => l.id) },
+        lessonId: { in: enrollment.course.lessons.map((l: { id: string }) => l.id) },
       },
     });
 
@@ -288,7 +288,7 @@ export class EnrollmentsService {
     const completedLessons = await this.prisma.lessonProgress.count({
       where: {
         userId: enrollment.userId,
-        lessonId: { in: enrollment.course.lessons.map((l) => l.id) },
+        lessonId: { in: enrollment.course.lessons.map((l: { id: string }) => l.id) },
         status: ProgressStatus.COMPLETED,
       },
     });
@@ -417,7 +417,7 @@ export class EnrollmentsService {
       },
     });
 
-    return leaderboard.map((entry, index) => ({
+    return leaderboard.map((entry: typeof leaderboard[number], index: number) => ({
       rank: index + 1,
       user: entry.user,
       progress: entry.progress,

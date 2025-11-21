@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TeamMemberRole } from '@prisma/client';
+import { TeamMemberRole } from '../../../common/types/prisma-types';
 
 export class AddMemberDto {
   @ApiProperty({

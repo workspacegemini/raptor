@@ -186,7 +186,7 @@ export class AnalyticsService {
 
     // Get completion stats for each course
     const coursesWithStats = await Promise.all(
-      courses.map(async (course) => {
+      courses.map(async (course: typeof courses[number]) => {
         const completedCount = await this.prisma.enrollment.count({
           where: {
             courseId: course.id,
@@ -255,8 +255,8 @@ export class AnalyticsService {
         _count: {
           userId: true,
         },
-      }).then((results) => {
-        const total = results.reduce((sum, r) => sum + r._count.userId, 0);
+      }).then((results: Array<{ userId: string; _count: { userId: number } }>) => {
+        const total = results.reduce((sum: number, r) => sum + r._count.userId, 0);
         return results.length > 0 ? total / results.length : 0;
       }),
       this.prisma.enrollment.groupBy({
@@ -268,8 +268,8 @@ export class AnalyticsService {
         _count: {
           userId: true,
         },
-      }).then((results) => {
-        const total = results.reduce((sum, r) => sum + r._count.userId, 0);
+      }).then((results: Array<{ userId: string; _count: { userId: number } }>) => {
+        const total = results.reduce((sum: number, r) => sum + r._count.userId, 0);
         return results.length > 0 ? total / results.length : 0;
       }),
     ]);
@@ -300,7 +300,7 @@ export class AnalyticsService {
     });
 
     // Group by skill
-    const skillIds = [...new Set(competencies.map((c) => c.skillId))];
+    const skillIds = [...new Set(competencies.map((c: typeof competencies[number]) => c.skillId))];
     const skills = await this.prisma.skill.findMany({
       where: {
         id: { in: skillIds },
@@ -313,10 +313,10 @@ export class AnalyticsService {
       },
     });
 
-    const matrix = skills.map((skill) => {
-      const skillCompetencies = competencies.filter((c) => c.skillId === skill.id);
+    const matrix = skills.map((skill: typeof skills[number]) => {
+      const skillCompetencies = competencies.filter((c: typeof competencies[number]) => c.skillId === skill.id);
 
-      const levelCounts = {
+      const levelCounts: Record<string, number> = {
         AWARE: 0,
         NOVICE: 0,
         COMPETENT: 0,
@@ -324,7 +324,7 @@ export class AnalyticsService {
         EXPERT: 0,
       };
 
-      skillCompetencies.forEach((c) => {
+      skillCompetencies.forEach((c: typeof competencies[number]) => {
         levelCounts[c.level] = c._count.userId;
       });
 
@@ -365,7 +365,7 @@ export class AnalyticsService {
     });
 
     const teamsWithStats = await Promise.all(
-      teams.map(async (team) => {
+      teams.map(async (team: typeof teams[number]) => {
         const completedEnrollments = await this.prisma.enrollment.count({
           where: {
             teamId: team.id,

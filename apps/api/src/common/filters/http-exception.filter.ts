@@ -7,7 +7,34 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LoggerService } from '../services/logger.service';
-import { Prisma } from '@prisma/client';
+
+// Type guards for Prisma errors
+interface PrismaKnownRequestError extends Error {
+  code: string;
+  meta?: Record<string, any>;
+  clientVersion: string;
+}
+
+interface PrismaValidationError extends Error {
+  name: 'PrismaClientValidationError';
+}
+
+function isPrismaKnownRequestError(error: unknown): error is PrismaKnownRequestError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    'clientVersion' in error &&
+    typeof (error as any).code === 'string'
+  );
+}
+
+function isPrismaValidationError(error: unknown): error is PrismaValidationError {
+  return (
+    error instanceof Error &&
+    error.name === 'PrismaClientValidationError'
+  );
+}
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -37,7 +64,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }
     }
     // Handle Prisma errors
-    else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+    else if (isPrismaKnownRequestError(exception)) {
       status = this.getPrismaErrorStatus(exception.code);
       message = this.getPrismaErrorMessage(exception);
       error = 'DatabaseError';
@@ -47,7 +74,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       };
     }
     // Handle Prisma validation errors
-    else if (exception instanceof Prisma.PrismaClientValidationError) {
+    else if (isPrismaValidationError(exception)) {
       status = HttpStatus.BAD_REQUEST;
       message = 'Invalid data provided';
       error = 'ValidationError';
@@ -108,7 +135,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     return errorMap[code] || HttpStatus.INTERNAL_SERVER_ERROR;
   }
 
-  private getPrismaErrorMessage(exception: Prisma.PrismaClientKnownRequestError): string {
+  private getPrismaErrorMessage(exception: PrismaKnownRequestError): string {
     const code = exception.code;
 
     switch (code) {

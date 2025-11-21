@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CacheService } from '../../common/services/cache.service';
-import { LessonType, ProgressStatus } from '@prisma/client';
+import { LessonType, ProgressStatus } from '../../common/types/prisma-types';
 
 @Injectable()
 export class LessonsService {

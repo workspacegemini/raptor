@@ -1,10 +1,10 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { WebSocketService } from './websocket.service';
-import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../modules/auth/guards/roles.guard';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../common/types/prisma-types';
 
 @ApiTags('WebSocket')
 @Controller('events')

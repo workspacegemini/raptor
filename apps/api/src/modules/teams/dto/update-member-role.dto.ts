@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { TeamMemberRole } from '@prisma/client';
+import { TeamMemberRole } from '../../../common/types/prisma-types';
 
 export class UpdateMemberRoleDto {
   @ApiProperty({

@@ -12,14 +12,15 @@ export class EmbeddingsService {
 
   constructor(private readonly config: ConfigService) {
     this.openai = new OpenAI({
-      apiKey: config.get<string>('OPENAI_API_KEY'),
+      apiKey: config.get<string>('OPENAI_API_KEY') || '',
     });
 
     this.pinecone = new Pinecone({
-      apiKey: config.get<string>('PINECONE_API_KEY'),
+      apiKey: config.get<string>('PINECONE_API_KEY') || '',
+      environment: config.get<string>('PINECONE_ENVIRONMENT') || 'gcp-starter',
     });
 
-    this.indexName = config.get<string>('PINECONE_INDEX', 'epe-lessons');
+    this.indexName = config.get<string>('PINECONE_INDEX') || 'epe-lessons';
   }
 
   async generateEmbedding(text: string): Promise<number[]> {

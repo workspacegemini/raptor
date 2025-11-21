@@ -19,7 +19,7 @@ import { UpdateOrganizationDto, UpdateOrganizationSettingsDto } from './dto/upda
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole, OrganizationStatus } from '@prisma/client';
+import { UserRole, OrganizationStatus } from '../../common/types/prisma-types';
 
 @ApiTags('organizations')
 @Controller('organizations')

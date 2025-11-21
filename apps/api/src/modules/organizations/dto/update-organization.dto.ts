@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, MinLength, MaxLength, IsUrl, IsObject, IsEnum } from 'class-validator';
-import { OrganizationStatus } from '@prisma/client';
+import { IsString, IsOptional, MinLength, MaxLength, IsUrl, IsObject, IsEnum, IsNotEmpty } from 'class-validator';
+import { OrganizationStatus } from '../../../common/types/prisma-types';
 
 export class UpdateOrganizationDto {
   @ApiProperty({ example: 'ACME Corporation', required: false })

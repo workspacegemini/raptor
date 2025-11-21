@@ -3,7 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../src/common/types/prisma-types';
 
 describe('Courses (e2e)', () => {
   let app: INestApplication;

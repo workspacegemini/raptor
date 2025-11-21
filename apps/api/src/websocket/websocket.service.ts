@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { WebSocketGateway as Gateway } from './websocket.gateway';
+import { AppWebSocketGateway as Gateway } from './websocket.gateway';
 
 /**
  * Service to interact with WebSocket Gateway from other modules

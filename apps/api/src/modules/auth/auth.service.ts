@@ -12,7 +12,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto, UserDto } from './dto/auth-response.dto';
 import * as bcrypt from 'bcrypt';
-import { UserRole, UserStatus } from '@prisma/client';
+import { UserRole, UserStatus } from '../../common/types/prisma-types';
 
 @Injectable()
 export class AuthService {

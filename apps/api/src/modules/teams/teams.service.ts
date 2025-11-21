@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { TeamMemberRole } from '@prisma/client';
+import { TeamMemberRole } from '../../common/types/prisma-types';
 
 @Injectable()
 export class TeamsService {

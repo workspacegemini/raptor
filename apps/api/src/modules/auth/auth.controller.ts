@@ -52,7 +52,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 204, description: 'User successfully logged out' })
-  async logout(@Request() req, @Body() refreshTokenDto: RefreshTokenDto): Promise<void> {
+  async logout(@Request() req: { user: { id: string } }, @Body() refreshTokenDto: RefreshTokenDto): Promise<void> {
     await this.authService.logout(req.user.id, refreshTokenDto.refreshToken);
   }
 }

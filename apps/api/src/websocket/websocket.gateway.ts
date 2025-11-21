@@ -18,13 +18,13 @@ import { JwtService } from '@nestjs/jwt';
   },
   namespace: '/ws',
 })
-export class WebSocketGateway
+export class AppWebSocketGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
   server: Server;
 
-  private readonly logger = new Logger(WebSocketGateway.name);
+  private readonly logger = new Logger(AppWebSocketGateway.name);
   private userSockets: Map<string, Set<string>> = new Map(); // userId -> Set of socketIds
 
   constructor(private jwtService: JwtService) {}

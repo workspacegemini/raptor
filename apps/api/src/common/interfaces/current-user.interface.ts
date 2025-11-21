@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from '@prisma/client';
+import { UserRole, UserStatus } from '../types/prisma-types';
 
 /**
  * Interface representing the authenticated user in request context

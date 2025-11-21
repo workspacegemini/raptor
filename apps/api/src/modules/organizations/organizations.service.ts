@@ -8,7 +8,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto, UpdateOrganizationSettingsDto } from './dto/update-organization.dto';
-import { OrganizationStatus } from '@prisma/client';
+import { OrganizationStatus } from '../../common/types/prisma-types';
 
 @Injectable()
 export class OrganizationsService {
@@ -319,7 +319,7 @@ export class OrganizationsService {
       },
     });
 
-    return users.map((u) => ({
+    return users.map((u: typeof users[number]) => ({
       role: u.role,
       count: u._count.role,
     }));

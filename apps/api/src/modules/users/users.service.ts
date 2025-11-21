@@ -9,7 +9,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateUserDto, ChangePasswordDto, UpdateUserPreferencesDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
-import { UserRole, UserStatus } from '@prisma/client';
+import { UserRole, UserStatus } from '../../common/types/prisma-types';
 
 @Injectable()
 export class UsersService {
@@ -276,8 +276,8 @@ export class UsersService {
     return {
       enrollments: {
         total: enrollments.length,
-        completed: enrollments.filter((e) => e.status === 'COMPLETED').length,
-        inProgress: enrollments.filter((e) => e.status === 'ACTIVE').length,
+        completed: enrollments.filter((e: typeof enrollments[number]) => e.status === 'COMPLETED').length,
+        inProgress: enrollments.filter((e: typeof enrollments[number]) => e.status === 'ACTIVE').length,
         courses: enrollments,
       },
       lessons: {
@@ -285,7 +285,7 @@ export class UsersService {
       },
       competencies: {
         total: competencies.length,
-        byLevel: competencies.reduce((acc, c) => {
+        byLevel: competencies.reduce((acc: Record<string, number>, c: typeof competencies[number]) => {
           acc[c.level] = (acc[c.level] || 0) + 1;
           return acc;
         }, {} as Record<string, number>),

@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsInt, IsArray, IsEnum, Min, Max, ValidateNested } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { QuestionType } from '@prisma/client';
+import { QuestionType } from '../../../common/types/prisma-types';
 
 export class QuizQuestionDto {
   @ApiProperty({

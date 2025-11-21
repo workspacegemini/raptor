@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum, IsInt, IsArray, Min, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CourseType, CourseDifficulty } from '@prisma/client';
+import { CourseType, CourseDifficulty } from '../../../common/types/prisma-types';
 
 export class CreateCourseDto {
   @ApiProperty({
